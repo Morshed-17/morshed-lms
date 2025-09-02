@@ -168,8 +168,7 @@ export default function CourseCreationPage() {
                   <FormItem className="w-full">
                     <FormLabel>Thumbnail Image</FormLabel>
                     <FormControl>
-                      <Uploader/>
-                      {/* <Input placeholder="thumbnail url" {...field} /> */}
+                      <Uploader value={field.value} onChange={field.onChange} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -261,6 +260,7 @@ export default function CourseCreationPage() {
                           placeholder="Duration"
                           type="number"
                           {...field}
+                          
                         />
                       </FormControl>
                       <FormMessage />
