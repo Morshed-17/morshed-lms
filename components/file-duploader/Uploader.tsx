@@ -143,6 +143,58 @@ export function Uploader() {
     }
   }
 
+  async function handleRemoveFile() {
+    if (fileState.isDeleting || !fileState.objectUrl) return;
+
+    try {
+      setFileState((prev) => ({
+        ...prev,
+        isDeleting: true,
+      }));
+
+      // Request to api to delete
+
+      const response = await fetch("/api/s3/delete", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          key: fileState.key,
+        }),
+      });
+      if (!response.ok) {
+        toast.error("Failed to remove file from storage");
+        setFileState((prev) => ({
+          ...prev,
+
+          error: true,
+          isDeleting: true,
+        }));
+        return;
+      }
+      if (fileState.objectUrl && !fileState.objectUrl.startsWith("http")) {
+        URL.revokeObjectURL(fileState.objectUrl);
+      }
+      setFileState(() => ({
+        file: null,
+        uploading: false,
+        progress: 0,
+        objectUrl: undefined,
+        error: false,
+        fileType: "image",
+        id: null,
+        isDeleting: false,
+      }));
+      toast.success("File removed successfully");
+    } catch (error) {
+      toast.error("Error removing file, please try again");
+      setFileState((prev) => ({
+        ...prev,
+        isDeleting: false,
+        error: true,
+      }));
+    }
+  }
+
   function rejectedFiles(fileRejection: FileRejection[]) {
     if (fileRejection.length) {
       const toManyFiles = fileRejection.find(
@@ -175,7 +227,13 @@ export function Uploader() {
       return <RenderErrorState />;
     }
     if (fileState.objectUrl) {
-      return <RenderUploadedState previewUrl={fileState.objectUrl} />;
+      return (
+        <RenderUploadedState
+          previewUrl={fileState.objectUrl}
+          handleRemoveFile={handleRemoveFile}
+          isDeleting={fileState.isDeleting}
+        />
+      );
     }
     return <RenderEmptyState isDragActive={isDragActive} />;
   }
@@ -195,6 +253,8 @@ export function Uploader() {
     multiple: false,
     maxSize: 5 * 1024 * 1024, // 5 Mb calculation
     onDropRejected: rejectedFiles,
+    disabled:
+      fileState.uploading || fileState.isDeleting || !!fileState.objectUrl,
   });
   return (
     <Card
