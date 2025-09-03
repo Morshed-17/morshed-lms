@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EditCourseForm } from "./_components/EditCourseForm";
+import { CourseStructure } from "./_components/CourseStructure";
 
 type Params = Promise<{ courseId: string }>;
 
@@ -46,7 +47,9 @@ export default async function EditRoute({ params }: { params: Params }) {
                 Here you can update your Course Structure
               </CardDescription>
             </CardHeader>
-            <CardContent></CardContent>
+            <CardContent>
+              <CourseStructure data={data} />
+            </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
